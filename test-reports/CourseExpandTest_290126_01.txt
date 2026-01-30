@@ -1,0 +1,54 @@
+=== LOG KIỂM TRA KHÓA HỌC LẬP TRÌNH WEB ===
+
+[PASS] CHAPTER = Chương 1: HTML cơ bản
+[FAIL] LESSON = Bài số 1: ổng quan về Website và Internet
+[PASS] LESSON = Bài số 2: Giới thiệu HTML
+[PASS] LESSON = Bài số 3: Các thẻ văn bản và hình ảnh
+[PASS] LESSON = Bài số 4: Danh sách và bảng
+[PASS] LESSON = Bài số 5: Form và nhập liệu
+[PASS] LESSON = Bài số 6: Giới thiệu HTML
+[PASS] LESSON = Bài số 7: Các thẻ văn bản và hình ảnh
+[PASS] LESSON = Bài số 8: Danh sách và bảng
+[PASS] LESSON = Bài số 9: Form và nhập liệu
+[PASS] CHAPTER = Chương 2: CSS và thiết kế giao diện
+[PASS] LESSON = Bài số 1: Giới thiệu CSS
+[PASS] LESSON = Bài số 2: Màu sắc và font chữ
+[PASS] LESSON = Bài số 3: Bố cục với Flexbox
+[PASS] LESSON = Bài số 4: Responsive với Media Query
+[PASS] LESSON = Bài số 5: Giới thiệu CSS
+[PASS] LESSON = Bài số 6: Màu sắc và font chữ
+[PASS] LESSON = Bài số 7: Bố cục với Flexbox
+[PASS] LESSON = Bài số 8: Responsive với Media Query
+[PASS] CHAPTER = Chương 3: JavaScript căn bản
+[PASS] LESSON = Bài số 1: Giới thiệu JavaScript
+[PASS] LESSON = Bài số 2: Biến và kiểu dữ liệu
+[PASS] LESSON = Bài số 3: Hàm và sự kiện
+[PASS] LESSON = Bài số 4: DOM cơ bản
+[PASS] LESSON = Bài số 5: Giới thiệu JavaScript
+[PASS] LESSON = Bài số 6: Biến và kiểu dữ liệu
+[PASS] LESSON = Bài số 7: Hàm và sự kiện
+[PASS] LESSON = Bài số 8: DOM cơ bản
+[PASS] CHAPTER = Chương 4: JavaScript nâng cao
+[PASS] LESSON = Bài số 1: Mảng và Object
+[PASS] LESSON = Bài số 2: Vòng lặp và điều kiện
+[PASS] LESSON = Bài số 3: Xử lý sự kiện nâng cao
+[PASS] LESSON = Bài số 4: Fetch API
+[PASS] CHAPTER = Chương 5: Responsive Website
+[PASS] LESSON = Bài số 1: Nguyên lý Responsive
+[PASS] LESSON = Bài số 2: Media Query nâng cao
+[PASS] LESSON = Bài số 3: Grid Layout
+[PASS] CHAPTER = Chương 6: Dự án mini Website cá nhân
+[PASS] LESSON = Bài số 1: Phân tích yêu cầu dự án
+[PASS] LESSON = Bài số 2: Thiết kế giao diện
+[PASS] LESSON = Bài số 3: Xây dựng chức năng
+[PASS] LESSON = Bài số 4: Kiểm thử và hoàn thiện
+
+=== CHÊNH LỆCH GIỮA HAI FILE ===
+Thiếu trong compare.txt (1 mục): [tongquanvewebsitevainternet]
+Dư trong compare.txt (1 mục): [ongquanvewebsitevainternet]
+
+=== TỔNG KẾT ===
+Tổng số mục kiểm tra FAILED = 1
+
+java.lang.AssertionError: There are failed validations. Check console log. expected [0] but found [1]
+    at User.CourseExpandTest.testExpandCourseAndVerify(CourseExpandTest.java)

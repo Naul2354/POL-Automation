@@ -1,0 +1,35 @@
+DANH SÁCH CHƯƠNG & BÀI HỌC
+
+==============================
+
+CHƯƠNG 1 | HTML cơ bản [BÀI 1] ổng quan về Website và Internet [BÀI 2] Giới thiệu HTML
+[BÀI 3] Các thẻ văn bản và hình ảnh [BÀI 4] Danh sách và bảng [BÀI 5] Form và nhập liệu [BÀI 6] Giới thiệu HTML
+[BÀI 7] Các thẻ văn bản và hình ảnh [BÀI 8] Danh sách và bảng [BÀI 9] Form và nhập liệu
+
+------------------------------------------------------------------------
+
+CHƯƠNG 2 | CSS và thiết kế giao diện [BÀI 1] Giới thiệu CSS [BÀI 2] Màu sắc và font chữ
+[BÀI 3] Bố cục với Flexbox [BÀI 4] Responsive với Media Query [BÀI 5] Giới thiệu CSS [BÀI 6] Màu sắc và font chữ
+[BÀI 7] Bố cục với Flexbox [BÀI 8] Responsive với Media Query
+
+------------------------------------------------------------------------
+
+CHƯƠNG 3 | JavaScript căn bản [BÀI 1] Giới thiệu JavaScript [BÀI 2] Biến và kiểu dữ liệu
+[BÀI 3] Hàm và sự kiện [BÀI 4] DOM cơ bản [BÀI 5] Giới thiệu JavaScript [BÀI 6] Biến và kiểu dữ liệu
+[BÀI 7] Hàm và sự kiện [BÀI 8] DOM cơ bản
+
+------------------------------------------------------------------------
+
+CHƯƠNG 4 | JavaScript nâng cao [BÀI 1] Mảng và Object [BÀI 2] Vòng lặp và điều kiện
+[BÀI 3] Xử lý sự kiện nâng cao [BÀI 4] Fetch API
+
+------------------------------------------------------------------------
+
+CHƯƠNG 5 | Responsive Website [BÀI 1] Nguyên lý Responsive [BÀI 2] Media Query nâng cao
+[BÀI 3] Grid Layout
+
+------------------------------------------------------------------------
+
+CHƯƠNG 6 | Dự án mini Website cá nhân [BÀI 1] Phân tích yêu cầu dự án [BÀI 2] Thiết kế giao diện
+[BÀI 3] Xây dựng chức năng [BÀI 4] Kiểm thử và hoàn thiện
+
