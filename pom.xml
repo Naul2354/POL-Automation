@@ -26,6 +26,20 @@
       <version>7.9.0</version>
     </dependency>
 
+    <!-- Apache Commons CSV for CSV file reading -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-csv</artifactId>
+      <version>1.10.0</version>
+    </dependency>
+
+    <!-- JSON Simple for JSON file reading -->
+    <dependency>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
   </dependencies>
 
   <!-- ===== BUILD ===== -->
@@ -51,6 +65,7 @@
           <includes>
             <include>**/StudentManagementTest.java</include>
             <include>**/CourseExpandTest.java</include>
+            <include>**/AddingCourseTest.java</include>
           </includes>
         </configuration>
       </plugin>

@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Cài đặt môi trường phát triển",
+    "description": "Hướng dẫn cài đặt Node.js, VS Code và các công cụ cần thiết để bắt đầu lập trình JavaScript."
+  },
+  {
+    "title": "Chương trình Hello World đầu tiên",
+    "description": "Viết chương trình JavaScript đầu tiên với console.log để in ra màn hình và hiểu cách chạy code."
+  },
+  {
+    "title": "Khai báo biến với let và const",
+    "description": "Học cách sử dụng let và const để khai báo biến, phân biệt sự khác nhau và khi nào nên dùng từng loại."
+  },
+  {
+    "title": "Làm việc với String",
+    "description": "Tìm hiểu các phương thức xử lý chuỗi như concat, substring, indexOf, replace và template literals."
+  },
+  {
+    "title": "Định nghĩa hàm cơ bản",
+    "description": "Học cách tạo hàm với function keyword, arrow function và cách truyền tham số vào hàm."
+  },
+  {
+    "title": "Scope và Closure",
+    "description": "Hiểu về phạm vi biến toàn cục và cục bộ, block scope và khái niệm closure trong JavaScript."
+  }
+]

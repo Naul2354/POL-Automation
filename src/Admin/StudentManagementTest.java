@@ -1,12 +1,17 @@
 package Admin;
 
+import java.io.FileReader;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -23,6 +28,14 @@ public class StudentManagementTest {
 
     private WebDriver driver;
     private WebDriverWait wait;
+
+    // CSV Data Storage
+    private static List<String> lastNames = new ArrayList<>();
+    private static List<String> middleNames = new ArrayList<>();
+    private static List<String> firstNames = new ArrayList<>();
+    private static List<String> streets = new ArrayList<>();
+    private static List<String> districts = new ArrayList<>();
+    private static List<StudentInfo> csvStudents = new ArrayList<>();
 
     // =======================
     // Student Model
@@ -190,7 +203,265 @@ public class StudentManagementTest {
     }
 
     // =======================
-    // Read data from resources/studentdata.txt
+    // Compare and verify student information from table
+    // =======================
+    private void verifyStudentInTable(StudentInfo expected) {
+        System.out.println("\n=== VERIFYING STUDENT DATA IN TABLE ===");
+
+        try {
+            // Find the student row in the table
+            WebElement studentRow = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//table//tr[.//td[contains(.,'" + expected.studentCode + "')]]")
+            ));
+
+            // Get all cells in the row
+            List<WebElement> cells = studentRow.findElements(By.tagName("td"));
+
+            // Table structure (based on actual web app):
+            // Column 0: Student Code
+            // Column 1: Last Name + Middle Name
+            // Column 2: First Name
+            // Column 3: Phone
+            // Column 4: Email
+            // Column 5: DOB (DD-MM-YYYY)
+            // Column 6: Gender
+            // Column 7: Address
+            // Column 8: Created Date
+            // Column 9: Actions
+
+            String actualStudentCode = cells.get(0).getText().trim();
+            String actualFullName = cells.get(1).getText().trim() + " " + cells.get(2).getText().trim();
+            String actualPhone = cells.get(3).getText().trim();
+            String actualEmail = cells.get(4).getText().trim();
+            String actualDOB = cells.get(5).getText().trim();
+            String actualGender = cells.get(6).getText().trim();
+            String actualAddress = cells.get(7).getText().trim();
+
+            // Display comparison
+            System.out.println("\n--- Comparison Results ---");
+            System.out.println("Student Code:");
+            System.out.println("  Expected: " + expected.studentCode);
+            System.out.println("  Actual:   " + actualStudentCode);
+
+            System.out.println("Full Name:");
+            System.out.println("  Expected: " + expected.fullName);
+            System.out.println("  Actual:   " + actualFullName);
+
+            System.out.println("Email:");
+            System.out.println("  Expected: " + expected.email);
+            System.out.println("  Actual:   " + actualEmail);
+
+            System.out.println("Phone:");
+            System.out.println("  Expected: " + expected.phone);
+            System.out.println("  Actual:   " + actualPhone);
+
+            System.out.println("Date of Birth:");
+            System.out.println("  Expected: " + expected.dob);
+            System.out.println("  Actual:   " + actualDOB);
+
+            System.out.println("Address:");
+            System.out.println("  Expected: " + expected.address);
+            System.out.println("  Actual:   " + actualAddress);
+
+            System.out.println("Gender:");
+            System.out.println("  Expected: " + expected.gender);
+            System.out.println("  Actual:   " + actualGender);
+
+            // Perform assertions using TestNG Assert
+            Assert.assertEquals(actualStudentCode, expected.studentCode,
+                "Student Code mismatch!");
+            System.out.println("  ✓ Student Code matches");
+
+            Assert.assertEquals(actualFullName, expected.fullName,
+                "Full Name mismatch!");
+            System.out.println("  ✓ Full Name matches");
+
+            Assert.assertEquals(actualEmail, expected.email,
+                "Email mismatch!");
+            System.out.println("  ✓ Email matches");
+
+            Assert.assertEquals(actualPhone, expected.phone,
+                "Phone mismatch!");
+            System.out.println("  ✓ Phone matches");
+
+            // DOB might have different format, so we need to normalize it
+            String normalizedExpectedDOB = normalizeDateFormat(expected.dob);
+            String normalizedActualDOB = normalizeDateFormat(actualDOB);
+            Assert.assertEquals(normalizedActualDOB, normalizedExpectedDOB,
+                "Date of Birth mismatch!");
+            System.out.println("  ✓ Date of Birth matches");
+
+            Assert.assertEquals(actualAddress, expected.address,
+                "Address mismatch!");
+            System.out.println("  ✓ Address matches");
+
+            Assert.assertEquals(actualGender, expected.gender,
+                "Gender mismatch!");
+            System.out.println("  ✓ Gender matches");
+
+            System.out.println("\n✓✓ ALL FIELDS VERIFIED SUCCESSFULLY! ✓✓\n");
+
+        } catch (AssertionError e) {
+            System.out.println("\n❌ VERIFICATION FAILED!");
+            System.out.println("Error: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            System.out.println("\n❌ ERROR during verification!");
+            System.out.println("Error: " + e.getMessage());
+            throw new RuntimeException("Failed to verify student data", e);
+        }
+    }
+
+    // =======================
+    // Normalize date format for comparison
+    // =======================
+    private String normalizeDateFormat(String date) {
+        if (date == null || date.isEmpty()) {
+            return "";
+        }
+
+        try {
+            // Handle MM/DD/YYYY format (from test data) -> convert to DD-MM-YYYY
+            if (date.contains("/")) {
+                String[] parts = date.split("/");
+                if (parts.length == 3) {
+                    // Input: MM/DD/YYYY (e.g., "06/01/2005")
+                    // Output: DD-MM-YYYY (e.g., "01-06-2005")
+                    return String.format("%02d-%02d-%s",
+                        Integer.parseInt(parts[1]),  // day
+                        Integer.parseInt(parts[0]),  // month
+                        parts[2]);                   // year
+                }
+            }
+            // Handle DD-MM-YYYY format (from table) -> already in correct format
+            else if (date.contains("-")) {
+                String[] parts = date.split("-");
+                if (parts.length == 3) {
+                    // If it's already DD-MM-YYYY, just ensure zero-padding
+                    if (parts[0].length() <= 2 && parts[1].length() <= 2) {
+                        // DD-MM-YYYY format
+                        return String.format("%02d-%02d-%s",
+                            Integer.parseInt(parts[0]),  // day
+                            Integer.parseInt(parts[1]),  // month
+                            parts[2]);                   // year
+                    }
+                    // If it's YYYY-MM-DD format, convert to DD-MM-YYYY
+                    else if (parts[0].length() == 4) {
+                        return String.format("%02d-%02d-%s",
+                            Integer.parseInt(parts[2]),  // day
+                            Integer.parseInt(parts[1]),  // month
+                            parts[0]);                   // year
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("⚠ Date conversion failed for: " + date + " - " + e.getMessage());
+            // If conversion fails, return original
+        }
+
+        return date;
+    }
+
+    // =======================
+    // Load CSV Data into Memory
+    // =======================
+    private void loadCSVData() {
+        try {
+            // Load Vietnamese Names
+            System.out.println("Loading Vietnamese names from CSV...");
+            Reader namesReader = new FileReader("src/resources/vietnamese_names.csv");
+            Iterable<CSVRecord> namesRecords = CSVFormat.DEFAULT
+                    .withFirstRecordAsHeader()
+                    .parse(namesReader);
+
+            for (CSVRecord record : namesRecords) {
+                String type = record.get("type");
+                String value = record.get("value");
+
+                if ("lastName".equals(type)) {
+                    lastNames.add(value);
+                } else if ("middleName".equals(type)) {
+                    middleNames.add(value);
+                } else if ("firstName".equals(type)) {
+                    firstNames.add(value);
+                }
+            }
+            namesReader.close();
+
+            System.out.println("  ✓ Loaded " + lastNames.size() + " last names");
+            System.out.println("  ✓ Loaded " + middleNames.size() + " middle names");
+            System.out.println("  ✓ Loaded " + firstNames.size() + " first names");
+
+            // Load Vietnamese Locations
+            System.out.println("Loading Vietnamese locations from CSV...");
+            Reader locationsReader = new FileReader("src/resources/vietnamese_locations.csv");
+            Iterable<CSVRecord> locationRecords = CSVFormat.DEFAULT
+                    .withFirstRecordAsHeader()
+                    .parse(locationsReader);
+
+            for (CSVRecord record : locationRecords) {
+                String type = record.get("type");
+                String value = record.get("value");
+
+                if ("street".equals(type)) {
+                    streets.add(value);
+                } else if ("district".equals(type)) {
+                    districts.add(value);
+                }
+            }
+            locationsReader.close();
+
+            System.out.println("  ✓ Loaded " + streets.size() + " streets");
+            System.out.println("  ✓ Loaded " + districts.size() + " districts");
+
+            // Load Student Test Data
+            System.out.println("Loading student test data from CSV...");
+            Reader studentsReader = new FileReader("src/resources/student_test_data.csv");
+            Iterable<CSVRecord> studentRecords = CSVFormat.DEFAULT
+                    .withFirstRecordAsHeader()
+                    .parse(studentsReader);
+
+            for (CSVRecord record : studentRecords) {
+                StudentInfo student = new StudentInfo(
+                    record.get("fullName"),
+                    record.get("studentCode"),
+                    record.get("email"),
+                    record.get("phone"),
+                    record.get("dob"),
+                    record.get("address"),
+                    record.get("gender")
+                );
+                csvStudents.add(student);
+            }
+            studentsReader.close();
+
+            System.out.println("  ✓ Loaded " + csvStudents.size() + " test students");
+            System.out.println("✓ All CSV data loaded successfully!\n");
+
+        } catch (Exception e) {
+            System.err.println("❌ Error loading CSV files: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to load CSV data", e);
+        }
+    }
+
+    // =======================
+    // Read specific student from CSV by index
+    // =======================
+    private StudentInfo readStudentFromCSV(int index) {
+        if (csvStudents.isEmpty()) {
+            loadCSVData();
+        }
+
+        if (index < 0 || index >= csvStudents.size()) {
+            throw new RuntimeException("Invalid student index: " + index + ". Available: 0-" + (csvStudents.size() - 1));
+        }
+
+        return csvStudents.get(index);
+    }
+
+    // =======================
+    // Read data from resources/studentdata.txt (Legacy method - kept for backward compatibility)
     // =======================
     private StudentInfo readStudentFromFile() {
         try {
@@ -219,28 +490,20 @@ public class StudentManagementTest {
     }
 
     // =======================
-    // Auto-generate random student data
+    // Auto-generate random student data (now using CSV data)
     // =======================
     private StudentInfo generateRandomStudentData() {
+        // Load CSV data if not already loaded
+        if (lastNames.isEmpty() || firstNames.isEmpty() || streets.isEmpty()) {
+            loadCSVData();
+        }
+
         Random random = new Random();
 
-        // Vietnamese common last names
-        String[] lastNames = {"Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Phan", "Vũ", "Đặng", "Bùi", "Đỗ" , "Hồ", "Ngô", "Dương", "Lý", "Hà", "Chu", "Cao", "Lưu", "Tạ", "Thái",
-                "Tô", "Võ", "Trịnh", "Mai", "La"};
-
-        // Vietnamese common middle names
-        String[] middleNames = {"Văn", "Thị", "Hữu", "Đức", "Minh", "Anh", "Tuấn", "Quang", "Hoàng", "Thanh", "Ngọc", "Gia", "Khánh", "Bảo", "Phúc", "Thành", "Trung", "Thiên",
-                "Mạnh", "Nhật", "Xuân", "Hồng", "Kim", "Thái"};
-
-        // Vietnamese common first names
-        String[] firstNames = {
-                "An", "Bình", "Cường", "Dũng", "Hải", "Hùng", "Nam", "Quân", "Tâm", "Tuấn", "Long", "Khoa", "Kiên", "Đạt", "Phát", "Hưng", "Thịnh", "Toàn", "Vinh", "Hiếu", "Sơn", "Khánh", "Bảo", "Khôi", "Khang", "Minh", "Đức", "Trung", "Thành", "Nhật",
-                "Linh", "Mai", "Phương", "Thảo", "Vy", "Yến", "Hà", "Trang", "Nhi", "Trâm", "Ngân", "Chi", "My", "Huyền", "Nga", "Lan", "Hoa", "Tuyết", "Quỳnh", "Ánh"
-        };
-        // Generate full name
-        String fullName = lastNames[random.nextInt(lastNames.length)] + " " +
-                          middleNames[random.nextInt(middleNames.length)] + " " +
-                          firstNames[random.nextInt(firstNames.length)];
+        // Generate full name using data from CSV
+        String fullName = lastNames.get(random.nextInt(lastNames.size())) + " " +
+                          middleNames.get(random.nextInt(middleNames.size())) + " " +
+                          firstNames.get(random.nextInt(firstNames.size()));
 
         // Generate unique student code with timestamp
         long timestamp = System.currentTimeMillis() % 100000;
@@ -270,15 +533,7 @@ public class StudentManagementTest {
         int day = 1 + random.nextInt(28);
         String dob = String.format("%02d/%02d/%d", month, day, year);
 
-        // Generate address
-        String[] streets = { "Lê Lợi","Nguyễn Huệ", "Trần Hưng Đạo", "Võ Văn Tần", "Hai Bà Trưng", "Lý Thường Kiệt", "Điện Biên Phủ", "Cách Mạng Tháng Tám", "Nguyễn Thị Minh Khai",
-                "Pasteur", "Nam Kỳ Khởi Nghĩa", "Phan Xích Long", "Hoàng Văn Thụ", "Nguyễn Văn Trỗi", "Xô Viết Nghệ Tĩnh", "Phạm Văn Đồng", "Nguyễn Oanh", "Quang Trung", "Lê Văn Sỹ", "Bạch Đằng"
-        };
-        String[] districts = {
-                "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10",
-                "Bến Nghé", "Bến Thành", "Tân Định", "Đa Kao", "Thảo Điền", "An Phú", "Linh Trung", "Linh Đông", "Phú Nhuận", "Hòa Bình", "Mỹ An", "Phước Long", "Hiệp Bình Chánh", "Tân Phong", "Tân Thuận Đông"
-        };
-
+        // Generate address using data from CSV
         // Generate Vietnamese-style house number: simple (12), with sub (12/5), or multi-level (12/3/7)
         int baseNumber = 1 + random.nextInt(500);
         String houseNumber;
@@ -292,8 +547,8 @@ public class StudentManagementTest {
         }
 
         String address = houseNumber + " " +
-                         streets[random.nextInt(streets.length)] + ", " +
-                         districts[random.nextInt(districts.length)] + ", TP.HCM";
+                         streets.get(random.nextInt(streets.size())) + ", " +
+                         districts.get(random.nextInt(districts.size())) + ", TP.HCM";
 
         // Random gender
         String[] genders = {"Nam", "Nữ", "Khác"};
@@ -347,10 +602,15 @@ public class StudentManagementTest {
 
         System.out.println("START TEST - Student Management CRUD Workflow (Add → Edit → Delete)");
 
-        // ✅ Auto-generate random student data
+        // Choose data source (3 options):
+
+        // Option 1: Auto-generate random student data from CSV
         StudentInfo expected = generateRandomStudentData();
 
-        // Alternative: Use data from file
+        // Option 2: Use specific student from CSV test data (by index 0-4)
+        // StudentInfo expected = readStudentFromCSV(0);
+
+        // Option 3: Use data from legacy text file (backward compatibility)
         // StudentInfo expected = readStudentFromFile();
 
         initDriver();
@@ -473,18 +733,25 @@ public class StudentManagementTest {
                 Thread.currentThread().interrupt();
             }
 
-            // =======================
-            // OPTIMIZED: Skip initial verification, go directly to EDIT
-            // =======================
             System.out.println("\n✓ Student added successfully: " + expected.studentCode);
 
             // =======================
-            // EDIT STUDENT (Optimized - single search)
+            // VERIFY STUDENT DATA IN TABLE
+            // =======================
+            System.out.println("\n=== VERIFYING ADDED STUDENT DATA ===");
+
+            // Search for the student to verify
+            searchStudent(expected.studentCode);
+
+            // Verify all fields match expected values
+            verifyStudentInTable(expected);
+
+            System.out.println("✓ PASS - Student data verification completed successfully");
+
+            // =======================
+            // EDIT STUDENT (using the same search results)
             // =======================
             System.out.println("\n=== BẮT ĐẦU SỬA THÔNG TIN HỌC VIÊN ===");
-
-            // Search for the student ONCE
-            searchStudent(expected.studentCode);
 
             // Find the row with student
             System.out.println("Tìm và click nút sửa (pencil icon).");
@@ -525,16 +792,8 @@ public class StudentManagementTest {
             }
 
             // Modify one field (let's modify the address - Địa chỉ)
-            Random random = new Random();
-            String[] streets = { "Lê Lợi","Nguyễn Huệ", "Trần Hưng Đạo", "Võ Văn Tần", "Hai Bà Trưng", "Lý Thường Kiệt", "Điện Biên Phủ", "Cách Mạng Tháng Tám", "Nguyễn Thị Minh Khai",
-                    "Pasteur", "Nam Kỳ Khởi Nghĩa", "Phan Xích Long", "Hoàng Văn Thụ", "Nguyễn Văn Trỗi", "Xô Viết Nghệ Tĩnh", "Phạm Văn Đồng", "Nguyễn Oanh", "Quang Trung", "Lê Văn Sỹ", "Bạch Đằng"
-            };
-            String[] districts = {
-                    "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10",
-                    "Bến Nghé", "Bến Thành", "Tân Định", "Đa Kao", "Thảo Điền", "An Phú", "Linh Trung", "Linh Đông", "Phú Nhuận", "Hòa Bình", "Mỹ An", "Phước Long", "Hiệp Bình Chánh", "Tân Phong", "Tân Thuận Đông"
-            };
-
             // Generate Vietnamese-style house number with flexible format
+            Random random = new Random();
             int baseNumber = 1 + random.nextInt(500);
             String houseNumber;
             int format = random.nextInt(3);
@@ -547,8 +806,8 @@ public class StudentManagementTest {
             }
 
             String newAddress = houseNumber + " " +
-                                streets[random.nextInt(streets.length)] + ", " +
-                                districts[random.nextInt(districts.length)] + ", TP.HCM";
+                                streets.get(random.nextInt(streets.size())) + ", " +
+                                districts.get(random.nextInt(districts.size())) + ", TP.HCM";
 
             System.out.println("Sửa địa chỉ từ: " + expected.address);
             System.out.println("          thành: " + newAddress);
@@ -624,11 +883,54 @@ public class StudentManagementTest {
                 }
             }
 
-            System.out.println("✓ PASS - Address edited successfully");
+            System.out.println("✓ Edit operation completed");
+
+            // =======================
+            // VERIFY EDITED DATA IN TABLE
+            // =======================
+            System.out.println("\n=== VERIFYING EDITED STUDENT DATA ===");
+
+            // Wait for table to update
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            // Search again to see updated data
+            searchStudent(expected.studentCode);
+
+            // Find the row and verify the new address
+            WebElement updatedRow = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//table//tr[.//td[contains(.,'" + expected.studentCode + "')]]")
+            ));
+
+            List<WebElement> updatedCells = updatedRow.findElements(By.tagName("td"));
+
+            // Find address column dynamically
+            String actualUpdatedAddress = "";
+            for (WebElement cell : updatedCells) {
+                String cellText = cell.getText().trim();
+                // Address contains comma and TP.HCM
+                if (cellText.contains(",") && cellText.contains("TP.HCM")) {
+                    actualUpdatedAddress = cellText;
+                    break;
+                }
+            }
+
+            System.out.println("Address Verification:");
+            System.out.println("  Expected (new): " + newAddress);
+            System.out.println("  Actual:         " + actualUpdatedAddress);
+
+            Assert.assertEquals(actualUpdatedAddress, newAddress,
+                "Updated address doesn't match!");
+            System.out.println("  ✓ Address was successfully updated!");
+
+            System.out.println("✓ PASS - Address edited and verified successfully");
 
             // Extra wait for UI to settle before delete
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

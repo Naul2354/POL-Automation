@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Giới thiệu về JavaScript",
+    "description": "Chương này giới thiệu về ngôn ngữ lập trình JavaScript cơ bản, lịch sử phát triển và ứng dụng trong thực tế."
+  },
+  {
+    "title": "Biến và Kiểu dữ liệu",
+    "description": "Tìm hiểu về cách khai báo biến, các kiểu dữ liệu cơ bản như String, Number, Boolean, Array và Object trong JavaScript."
+  },
+  {
+    "title": "Hàm và Phạm vi",
+    "description": "Học cách định nghĩa và sử dụng hàm, tham số, giá trị trả về và phạm vi biến trong JavaScript."
+  }
+]
